@@ -1,7 +1,7 @@
 package com.destaxa.client.controller;
 
 
-import com.destaxa.shared.ISO8583Message;
+import com.destaxa.client.ISO8583Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
