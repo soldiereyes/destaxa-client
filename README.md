@@ -101,7 +101,7 @@ Vá para a aba Body e selecione o tipo JSON.
     "value": "-100.00"
 }
 
-3. Timeout Simulado (Nenhuma Resposta):
+3. Timeout Simulado (Nenhuma Resposta do Servidor):
 
 {
     "card_number": "4111111111111111",
