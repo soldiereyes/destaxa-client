@@ -69,7 +69,6 @@ Códigos de Resposta:
 
         "000": Transação aprovada.
         "051": Transação rejeitada.
-        Timeout: O cliente não recebe resposta (simula tempo excedido no servidor).
 
 # TESTES DE INTEGRAÇÃO
 

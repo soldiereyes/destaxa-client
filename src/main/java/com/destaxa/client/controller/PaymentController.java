@@ -48,6 +48,11 @@ public class PaymentController {
             String rawResponse = input.readLine();
             logger.info("Resposta recebida do servidor: {}", rawResponse);
 
+            if (rawResponse == null) {
+                logger.error("Resposta do servidor não recebida, causando timeout.");
+                return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Tempo de espera excedido. Nenhuma resposta do servidor.");
+            }
+
             ISO8583Message responseMessage = ISO8583Message.parseMessage(rawResponse);
             return ResponseEntity.ok("Response Code: " + responseMessage.getField(39));
 

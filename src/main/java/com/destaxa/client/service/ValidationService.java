@@ -40,7 +40,14 @@ public class ValidationService {
             }
             if (transactionValue > 1000.00) {
                 logger.warn("Valor acima do permitido: {}", transactionValue);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Valor da transação não pode ultrapassar 1000.00.");
+
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Tempo de espera excedido devido ao valor da transação.");
             }
         } catch (NumberFormatException e) {
             logger.warn("Formato inválido para o campo 'value': {}", value);
