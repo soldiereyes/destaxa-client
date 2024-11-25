@@ -1,54 +1,59 @@
 package com.destaxa.client.controller;
 
-
 import com.destaxa.client.ISO8583Message;
+import com.destaxa.client.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payment")
 public class PaymentController {
+
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private final ValidationService validationService;
+
+    public PaymentController(ValidationService validationService) {
+        this.validationService = validationService;
+    }
 
     @PostMapping("/authorize")
-    public String authorizePayment(@RequestBody Map<String, String> payload) {
-        logger.info("Received payment authorization request with payload: {}", payload);
+    public ResponseEntity<String> authorizePayment(@RequestBody Map<String, String> payload) {
+        ResponseEntity<String> validationError = validationService.validateRequest(payload);
+        if (validationError != null) {
+            return validationError;
+        }
 
         try (Socket socket = new Socket("localhost", 5000);
              PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
+            String cardNumber = payload.get("card_number");
+            String value = payload.get("value");
+
             ISO8583Message requestMessage = new ISO8583Message("0200");
-            requestMessage.setField(2, payload.get("card_number"));
-            requestMessage.setField(4, payload.get("value"));
+            requestMessage.setField(2, cardNumber);
+            requestMessage.setField(4, value);
             requestMessage.setField(11, "123456");
 
-            logger.debug("Sending ISO8583 request: {}", requestMessage.buildMessage());
+            logger.info("Enviando mensagem ISO8583 ao servidor: {}", requestMessage.buildMessage());
             output.println(requestMessage.buildMessage());
 
             String rawResponse = input.readLine();
-            logger.debug("Raw response received: {}", rawResponse);
+            logger.info("Resposta recebida do servidor: {}", rawResponse);
 
             ISO8583Message responseMessage = ISO8583Message.parseMessage(rawResponse);
-            logger.info("Transaction processed with Response Code: {}", responseMessage.getField(39));
-
-            return "Response Code: " + responseMessage.getField(39);
+            return ResponseEntity.ok("Response Code: " + responseMessage.getField(39));
 
         } catch (IOException e) {
-            logger.error("Error communicating with the server: {}", e.getMessage());
-            return "Error communicating with the server.";
+            logger.error("Erro de comunicação com o servidor: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro de comunicação com o servidor.");
         }
     }
 }
-
