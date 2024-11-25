@@ -34,8 +34,8 @@ ISO8583: Protocolo financeiro para mensagens de transações.
 
 1. Clone o Repositório:
    https://github.com/soldiereyes/destaxa-client
-2. Entre na pasta do projeto: 
-cd destaxa-client
+2. Entre na pasta do projeto:
+   cd destaxa-client
 3. Configure a conexão com o Servidor:
    server.host=localhost
    server.port=5000
@@ -55,13 +55,9 @@ Endpoint: /api/payment/authorize
         card_number (string): Número do cartão.
         value (string): Valor da transação.
 
-Exemplo de Requisição: 
+Exemplo de Requisição:
 
-curl -X POST http://localhost:8081/api/payment/authorize \
--H "Content-Type: application/json" \
--d '{"card_number":"4111111111111111", "value":"500.00"}'
-
-Exemplo de Resposta: 
+Exemplo de Resposta:
 
 {
 
@@ -69,11 +65,79 @@ Exemplo de Resposta:
 
 }
 
-
-Códigos de Resposta: 
+Códigos de Resposta:
 
         "000": Transação aprovada.
         "051": Transação rejeitada.
         Timeout: O cliente não recebe resposta (simula tempo excedido no servidor).
+
+# TESTES DE INTEGRAÇÃO
+
+Instruções para Testes no Insomnia
+
+Abra o Insomnia e clique em New Request.
+
+Configure os seguintes campos:
+        Name: Nome da requisição (ex.: "Transação Aprovada").
+        Method: POST.
+        URL: http://localhost:8081/api/payment/authorize. 
+
+Vá para a aba Body e selecione o tipo JSON.
+    Insira um dos JSONs de exemplo fornecidos acima.
+    Clique em Send para enviar a requisição e observe a resposta.
+
+``` json 
+
+1. Transação Aprovada (Response Code: 000):
+
+{
+"card_number": "4111111111111111",
+"value": "500.00"
+}
+
+2. Transação Rejeitada (Response Code: 051):
+
+{
+    "card_number": "4111111111111111",
+    "value": "-100.00"
+}
+
+3. Timeout Simulado (Nenhuma Resposta):
+
+{
+    "card_number": "4111111111111111",
+    "value": "1500.00"
+}
+
+4. Erros de Campos Ausentes ou Inválidos:
+
+{
+    "value": "500.00"
+}
+
+5. Campo value ausente:
+
+{
+    "card_number": "4111111111111111"
+}
+
+6. Ambos os campos ausentes:
+
+{}
+
+7. Valor não numérico:
+
+{
+    "card_number": "4111111111111111",
+    "value": "invalid"
+}
+
+8. Número do cartão Inválido:
+
+{
+    "card_number": "1234abcd",
+    "value": "500.00"
+}
+
 
 
